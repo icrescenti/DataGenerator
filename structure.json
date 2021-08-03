@@ -1,10 +1,21 @@
-[
-    {
-        "label": "name",
-        "value": "first_name"
-    },
-    {
-        "label": "midname",
-        "value": "middle_name"
-    }
-]
+{
+    "format": "sql",
+    "quanitity": 10,
+    "tablename": "users",
+    "fields":
+    [
+        {
+            "label": "id",
+            "value": "integer",
+            "autoIncrementFrom": 11
+        },
+        {
+            "label": "name",
+            "value": "first_name"
+        },
+        {
+            "label": "midname",
+            "value": "middle_name"
+        }
+    ]
+}
