@@ -7,15 +7,32 @@
         {
             "label": "id",
             "value": "integer",
-            "autoIncrementFrom": 11
+            "autoIncrementFrom": 100
         },
         {
             "label": "name",
             "value": "first_name"
         },
         {
-            "label": "midname",
-            "value": "middle_name"
+            "label": "lastName",
+            "value": "last_name"
+        },
+        {
+            "label": "employeeId",
+            "value": "integer",
+            "range": [0,1000]
+        },
+        {
+            "label": "date",
+            "value": "date",
+            "range": ["01-01-2000","24-12-2040"],
+            "format": "%d-%m-%Y"
+        },
+        {
+            "label": "timestamp",
+            "value": "date",
+            "range": ["1/1/1970 00:00:00","31/12/2099 00:00:00"],
+            "format": "%d/%m/%Y %H:%M:%S"
         }
     ]
 }
