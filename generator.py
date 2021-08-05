@@ -2,6 +2,10 @@ import sys
 import json
 import random
 import time
+import os.path
+from os import path
+import progressbar
+from time import sleep
 
 f = None
 
@@ -35,10 +39,22 @@ def convertToFormat(headers, values):
         print("(TO-DO)")
 
 def writeToFile(value):
-    if(data['format'] == "sql"):
-        f = open('generated.sql','a')
-        f.write(value)
-        f.close()
+    gen = open('generated.' + data['format'],'a')
+    gen.write(value)
+    gen.close()
+
+if (path.exists('generated.' + data['format'])):
+    print("Cleaning generated data file.........", end = '')
+    gen = open('generated.' + data['format'],'w')
+    gen.write('')
+    gen.close()
+    print('OK')
+
+print("Running.........")
+
+bar = progressbar.ProgressBar(maxval=data['quanitity'], \
+    widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+bar.start()
 
 for _ in range(data['quanitity']):
     headers = []
@@ -89,6 +105,8 @@ for _ in range(data['quanitity']):
 
         values.append(str(value))
     convertToFormat(headers, values)
+    bar.update(_)
 
 f.close()
-print("Script ended, information generated with " + str(errors) + " errors")
+bar.finish()
+print("Script ended, information generated (" + str(data['quanitity']) + " rows) with " + str(errors) + " errors")
