@@ -17,6 +17,12 @@ else:
 data = json.load(f)
 
 errors = 0
+quote = "\'"
+
+try:
+    quote = data['quote']
+except KeyError:
+    quote = "\'"
 
 def str_time_prop(start, end, time_format, prop):
     stime = time.mktime(time.strptime(start, time_format))
@@ -27,7 +33,7 @@ def str_time_prop(start, end, time_format, prop):
 def random_date(start, end, xformat, prop):
     return str_time_prop(start, end, xformat, prop)
 
-def convertToFormat(headers, values):
+def convertToFormat(pos, headers, values):
     if(data['format'] == "sql"):
         writeToFile("INSERT INTO " + data['tablename'] + 
         " (" +
@@ -36,7 +42,17 @@ def convertToFormat(headers, values):
             (",".join(values))
         + ");\n")
     elif(data['format'] == "csv"):
-        print("(TO-DO)")
+        value = None
+
+        if (pos == 0):
+            value = headers
+        else:
+            value = values
+
+        writeToFile(
+        (data['delimiter'].join(value)) + 
+        data['csvnewline']
+        )
 
 def writeToFile(value):
     gen = open('generated.' + data['format'],'a')
@@ -61,7 +77,7 @@ for _ in range(data['quanitity']):
     values = []
 
     for item in data['fields']:
-        headers.append("\'" + item['label'] + "\'")
+        headers.append(quote + item['label'] + quote)
 
         valuesFStream = None
         xtype = 0
@@ -92,19 +108,19 @@ for _ in range(data['quanitity']):
         elif (item['value'] == "date"):
             try:
                 xrange = item['range']
-                value = "\'" + random_date(xrange[0], xrange[1], item['format'], random.random()) + "\'"
+                value = quote + random_date(xrange[0], xrange[1], item['format'], random.random()) + quote
             except KeyError:
                 print("ERROR: " + item['label'] + " doesen't have range or format attribute")
                 errors += 1
-                value = "\'" + random_date("1/1/1970 00:00:00", "31/12/2099 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + "\'"
+                value = quote + random_date("1/1/1970 00:00:00", "31/12/2099 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
             
         if (xtype == 1):
             valuesArray = json.load(valuesFStream)
-            value = "\'" + valuesArray[random.randrange(0,len(valuesArray))] + "\'"
+            value = quote + valuesArray[random.randrange(0,len(valuesArray))] + quote
             valuesFStream.close()
 
         values.append(str(value))
-    convertToFormat(headers, values)
+    convertToFormat(_, headers, values)
     bar.update(_)
 
 f.close()

@@ -2,6 +2,9 @@
     "format": "sql",
     "quanitity": 150,
     "tablename": "users",
+    "delimiter": ",",
+    "csvnewline": ";\n",
+    "quote": "\"",
     "fields":
     [
         {
