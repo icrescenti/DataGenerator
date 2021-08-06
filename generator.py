@@ -70,6 +70,7 @@ def random_date(start, end, xformat, prop):
 
 def convertToFormat(pos, headers, values):
     if(data['show']):
+        print("(BATCH #" + str(pos) + ") ", end = '')
         for _ in range(len(headers)):
             print(values[_], end = '')
 
@@ -171,7 +172,7 @@ for _ in range(data['quanitity']):
             except KeyError:
                 print("ERROR: " + item['label'] + " doesen't have range or format attribute")
                 errors += 1
-                value = quote + random_date("1/1/1970 00:00:00", "31/12/2099 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
+                value = quote + random_date("1/1/1990 00:00:00", "31/12/2080 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
             
         if (xtype == 1):
             valuesArray = json.load(valuesFStream)
@@ -180,8 +181,10 @@ for _ in range(data['quanitity']):
 
         values.append(str(value))
     convertToFormat(_, headers, values)
-    bar.update(_)
+    if(data['show'] == False):
+        bar.update(_)
 
 f.close()
-bar.finish()
+if(data['show'] == False):
+    bar.finish()
 print("Script ended, information generated (" + str(data['quanitity']) + " rows) with " + str(errors) + " errors")
