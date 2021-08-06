@@ -36,7 +36,7 @@ data = json.load(f)
 try:
     quote = data['quote']
 except KeyError:
-    quote = "\'"
+    None
 
 try:
     sql_settings = data['sql_settings']
@@ -49,7 +49,12 @@ try:
             database=sql_settings['database']
         )
 except KeyError:
-    quote = "\'"
+    None
+
+try:
+    csv_settings = data['csv_settings']
+except KeyError:
+    None
 
 #endregion
 
@@ -100,8 +105,8 @@ def convertToFormat(pos, headers, values):
             value = values
 
         writeToFile(
-        (data['delimiter'].join(value)) + 
-        data['newline']
+        csv_settings['delimiter'].join(value) + 
+        csv_settings['newline']
         )
 
 def writeToFile(value):
