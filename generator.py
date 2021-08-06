@@ -6,8 +6,21 @@ import os.path
 from os import path
 import progressbar
 from time import sleep
+import mysql.connector
+
+#region global variables
 
 f = None
+mydb = None
+errors = 0
+quote = "\'"
+
+sql_settings = None
+csv_settings = None
+
+#endregion
+
+#region read strucutre file
 
 if len(sys.argv) > 1:
     f = open(sys.argv[1],)
@@ -16,13 +29,31 @@ else:
 
 data = json.load(f)
 
-errors = 0
-quote = "\'"
+#endregion
+
+#region read preferences
 
 try:
     quote = data['quote']
 except KeyError:
     quote = "\'"
+
+try:
+    sql_settings = data['sql_settings']
+    execute = sql_settings['execute']
+    if (execute):
+        mydb = mysql.connector.connect(
+            host=sql_settings['host'],
+            user=sql_settings['user'],
+            password=sql_settings['password'],
+            database=sql_settings['database']
+        )
+except KeyError:
+    quote = "\'"
+
+#endregion
+
+#region random date
 
 def str_time_prop(start, end, time_format, prop):
     stime = time.mktime(time.strptime(start, time_format))
@@ -33,14 +64,30 @@ def str_time_prop(start, end, time_format, prop):
 def random_date(start, end, xformat, prop):
     return str_time_prop(start, end, xformat, prop)
 
+#endregion
+
+#region generation functions
+
 def convertToFormat(pos, headers, values):
+    if(data['show']):
+        for _ in range(len(headers)):
+            print(values[_], end = '')
+
+        print('')
     if(data['format'] == "sql"):
-        writeToFile("INSERT INTO " + data['tablename'] + 
+        sql = ("INSERT INTO " + sql_settings['tablename'] + 
         " (" +
             (",".join(headers)) + 
         ") VALUES (" + 
             (",".join(values))
         + ");\n")
+
+        if(sql_settings['execute']):
+            mycursor = mydb.cursor()
+            mycursor.execute(sql)
+        else:
+            writeToFile(sql)
+
     elif(data['format'] == "csv"):
         value = None
 
@@ -51,13 +98,17 @@ def convertToFormat(pos, headers, values):
 
         writeToFile(
         (data['delimiter'].join(value)) + 
-        data['csvnewline']
+        data['newline']
         )
 
 def writeToFile(value):
     gen = open('generated.' + data['format'],'a')
     gen.write(value)
     gen.close()
+
+#endregion
+
+#region clear generation file
 
 if (path.exists('generated.' + data['format'])):
     print("Cleaning generated data file.........", end = '')
@@ -66,18 +117,26 @@ if (path.exists('generated.' + data['format'])):
     gen.close()
     print('OK')
 
+#endregion
+
 print("Running.........")
+
+#region progress bar
 
 bar = progressbar.ProgressBar(maxval=data['quanitity'], \
     widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-bar.start()
+
+if(data['show'] == False):
+    bar.start()
+
+#endregion
 
 for _ in range(data['quanitity']):
     headers = []
     values = []
 
     for item in data['fields']:
-        headers.append(quote + item['label'] + quote)
+        headers.append(item['label'])
 
         valuesFStream = None
         xtype = 0

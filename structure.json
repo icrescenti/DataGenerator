@@ -1,10 +1,22 @@
 {
     "format": "sql",
     "quanitity": 150,
-    "tablename": "users",
-    "delimiter": ",",
-    "csvnewline": ";\n",
-    "quote": "\"",
+    "show": false,
+    "sql_settings": 
+    {
+        "execute": false,
+        "host": "host",
+        "user": "user",
+        "password": "password",
+        "database": "database",
+        "tablename": "test"
+    },
+    "csv_settings": 
+    {
+        "delimiter": ",",
+        "newline": ";\n"
+    },
+    "quote": "'",
     "fields":
     [
         {
