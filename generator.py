@@ -75,6 +75,7 @@ def convertToFormat(pos, headers, values):
             print(values[_], end = '')
 
         print('')
+
     if(data['format'] == "sql"):
         sql = ("INSERT INTO " + sql_settings['tablename'] + 
         " (" +
@@ -86,6 +87,7 @@ def convertToFormat(pos, headers, values):
         if(sql_settings['execute']):
             mycursor = mydb.cursor()
             mycursor.execute(sql)
+            mydb.commit()
         else:
             writeToFile(sql)
 
