@@ -30,7 +30,8 @@
         },
         {
             "label": "lastName",
-            "value": "last_name"
+            "value": "last_name",
+            "lenght": 2
         },
         {
             "label": "active",
@@ -53,6 +54,11 @@
             "value": "date",
             "range": ["1/1/1990 00:00:00","31/12/2080 00:00:00"],
             "format": "%d/%m/%Y %H:%M:%S"
+        },
+        {
+            "label": "emoji",
+            "value": "emoji",
+            "length": 10
         }
     ]
 }

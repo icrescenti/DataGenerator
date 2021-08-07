@@ -110,7 +110,7 @@ def convertToFormat(pos, headers, values):
         )
 
 def writeToFile(value):
-    gen = open('generated.' + data['format'],'a')
+    gen = open('generated.' + data['format'], 'a', encoding="utf8")
     gen.write(value)
     gen.close()
 
@@ -181,9 +181,24 @@ for _ in range(data['quanitity']):
                 errors += 1
                 value = quote + random_date("1/1/1990 00:00:00", "31/12/2080 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
             
+        elif (item['value'] == "emoji"):
+            valuesFStream = open('data/emojis.json', encoding="utf8")
+            xtype = 1
+
         if (xtype == 1):
             valuesArray = json.load(valuesFStream)
-            value = quote + valuesArray[random.randrange(0,len(valuesArray))] + quote
+            value = quote
+            leng = 1
+
+            try:
+                leng = item['length']
+            except KeyError:
+                None
+            
+            for __ in range(leng):
+                value += valuesArray[random.randrange(0,len(valuesArray))]
+            
+            value += quote
             valuesFStream.close()
 
         values.append(str(value))

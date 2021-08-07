@@ -1,2 +1,5 @@
 *.sql
 *.csv
+*.cmd
+*.sh
+*.exe
