@@ -3,3 +3,5 @@
 *.cmd
 *.sh
 *.exe
+*.zip
+dist/generator
