@@ -2,6 +2,8 @@
 
 Made with Python
 
+- Open for pull requests
+
 ## 1. Dependencies
 
 To install required dependencies run
