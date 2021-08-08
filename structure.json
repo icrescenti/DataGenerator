@@ -56,6 +56,10 @@
             "format": "%d/%m/%Y %H:%M:%S"
         },
         {
+            "label": "site",
+            "value": "places"
+        },
+        {
             "label": "emoji",
             "value": "emoji",
             "length": 10

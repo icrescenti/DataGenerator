@@ -171,6 +171,10 @@ for _ in range(data['quanitity']):
         elif (item['value'] == "last_name"):
             valuesFStream = open('data/last-names.json',)
             xtype = 1
+        
+        elif (item['value'] == "places"):
+            valuesFStream = open('data/places.json',)
+            xtype = 1
 
         elif (item['value'] == "date"):
             try:
