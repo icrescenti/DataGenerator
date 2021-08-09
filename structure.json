@@ -1,6 +1,6 @@
 {
-    "format": "sql",
-    "quanitity": 150,
+    "format": "xml",
+    "quanitity": 1,
     "show": false,
     "sql_settings": 
     {
@@ -15,14 +15,23 @@
     {
         "delimiter": ",",
         "newline": ";\n"
+    }
+    ,"xml_settings": 
+    {
+        "newline": "\n"
     },
     "quote": "'",
+    "http_settings":
+    {
+        "execute": true,
+        "port": 7567
+    },
     "fields":
     [
         {
             "label": "id",
             "value": "integer",
-            "autoIncrementFrom": 100
+            "autoIncrementFrom": 1
         },
         {
             "label": "name",

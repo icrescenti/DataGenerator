@@ -12,68 +12,93 @@ import socketserver
 
 #region global variables
 
-f = None
+data = None
 mydb = None
-errors = 0
+bar = None
 quote = "\'"
 
 sql_settings = None
 csv_settings = None
+http_settings = None
+xml_settings = None
 
 #endregion
 
-#region HTTP Server
+#region load variables function
 
-class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == '/':
-            self.path = 'structure.json'
-        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+def loadStructFile():
+    global data
+    global sql_settings
+    global csv_settings
+    global http_settings
+    global xml_settings
+    global bar
 
-handler_object = MyHttpRequestHandler
+    #region read strucutre file
+    f = None
 
-PORT = 1714
-my_server = socketserver.TCPServer(("", PORT), handler_object)
+    if len(sys.argv) > 1:
+        f = open(sys.argv[1],)
+    else:
+        f = open('structure.json',)
+
+    data = json.load(f)
+    f.close()
+
+    #endregion
+
+    #region read preferences
+
+    try:
+        quote = data['quote']
+    except KeyError:
+        None
+
+    try:
+        sql_settings = data['sql_settings']
+        execute = sql_settings['execute']
+        if (execute):
+            mydb = mysql.connector.connect(
+                host=sql_settings['host'],
+                user=sql_settings['user'],
+                password=sql_settings['password'],
+                database=sql_settings['database']
+            )
+    except KeyError:
+        None
+
+    try:
+        csv_settings = data['csv_settings']
+    except KeyError:
+        None
+
+    try:
+        http_settings = data['http_settings']
+        print(http_settings)
+    except KeyError:
+        None
+        
+    try:
+        xml_settings = data['xml_settings']
+    except KeyError:
+        None
+
+    #endregion
+
+    #region progress bar
+
+    bar = progressbar.ProgressBar(maxval=data['quanitity'], \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+
+    if(data['show'] == False):
+        bar.start()
+
+    #endregion
 
 #endregion
 
-#region read strucutre file
-
-if len(sys.argv) > 1:
-    f = open(sys.argv[1],)
-else:
-    f = open('structure.json',)
-
-data = json.load(f)
-
-#endregion
-
-#region read preferences
-
-try:
-    quote = data['quote']
-except KeyError:
-    None
-
-try:
-    sql_settings = data['sql_settings']
-    execute = sql_settings['execute']
-    if (execute):
-        mydb = mysql.connector.connect(
-            host=sql_settings['host'],
-            user=sql_settings['user'],
-            password=sql_settings['password'],
-            database=sql_settings['database']
-        )
-except KeyError:
-    None
-
-try:
-    csv_settings = data['csv_settings']
-except KeyError:
-    None
-
-#endregion
+#load variables before continue
+loadStructFile()
 
 #region random date
 
@@ -85,6 +110,28 @@ def str_time_prop(start, end, time_format, prop):
  
 def random_date(start, end, xformat, prop):
     return str_time_prop(start, end, xformat, prop)
+
+#endregion
+
+#region HTTP Server
+
+class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        loadStructFile()
+        generate()
+        if self.path == '/':
+            self.path = 'generated.' + data['format']
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+handler_object = MyHttpRequestHandler
+
+PORT = 8080
+try:
+    PORT = http_settings['port']
+except:
+    None
+
+my_server = socketserver.TCPServer(("", PORT), handler_object)
 
 #endregion
 
@@ -125,6 +172,15 @@ def convertToFormat(pos, headers, values):
         csv_settings['delimiter'].join(value) + 
         csv_settings['newline']
         )
+    
+    elif(data['format'] == "xml"):
+        writeToFile("   <item>\n")
+        for headerIndex in range(len(headers)):
+            writeToFile(
+            "       <" + headers[headerIndex] + ">" + values[headerIndex] + "</" + headers[headerIndex] + ">" + 
+            xml_settings['newline']
+            )
+        writeToFile("   </item>\n")
 
 def writeToFile(value):
     gen = open('generated.' + data['format'], 'a', encoding="utf8")
@@ -133,101 +189,113 @@ def writeToFile(value):
 
 #endregion
 
-#region clear generation file
+#region generation
 
-if (path.exists('generated.' + data['format'])):
-    print("Cleaning generated data file.........", end = '')
-    gen = open('generated.' + data['format'],'w')
-    gen.write('')
-    gen.close()
-    print('OK')
+def generate():
+    errors = 0
 
-#endregion
+    print("Running.........")
 
-print("Running.........")
+    #region clear generation file
 
-#region progress bar
+    if (path.exists('generated.' + data['format'])):
+        print("Cleaning generated data file.........", end = '')
+        gen = open('generated.' + data['format'],'w')
+        gen.write('')
+        gen.close()
+        print('OK')
 
-bar = progressbar.ProgressBar(maxval=data['quanitity'], \
-    widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    #endregion
 
-if(data['show'] == False):
-    bar.start()
+    if(data['format'] == "xml"):
+        writeToFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        writeToFile("<items>\n")
 
-#endregion
+    for _ in range(data['quanitity']):
+        headers = []
+        values = []
 
-for _ in range(data['quanitity']):
-    headers = []
-    values = []
+        for item in data['fields']:
+            headers.append(item['label'])
 
-    for item in data['fields']:
-        headers.append(item['label'])
+            valuesFStream = None
+            readFromFile = True
+            value = 0
+            
+            if (item['value'] == "integer"):
+                readFromFile = False
+                try:
+                    value = item['autoIncrementFrom'] + _
+                except KeyError:
+                    try:
+                        xrange = item['range']
+                        value = random.randrange(xrange[0],xrange[1])
+                    except KeyError:
+                        value = random.randrange(0,100)
 
-        valuesFStream = None
-        readFromFile = True
-        value = 0
-        
-        if (item['value'] == "integer"):
-            readFromFile = False
-            try:
-                value = item['autoIncrementFrom'] + _
-            except KeyError:
+            elif (item['value'] == "first_name"):
+                valuesFStream = open('data/first_names.json',)
+
+            elif (item['value'] == "middle_name"):
+                valuesFStream = open('data/middle-names.json',)
+
+            elif (item['value'] == "last_name"):
+                valuesFStream = open('data/last-names.json',)
+            
+            elif (item['value'] == "places"):
+                valuesFStream = open('data/places.json',)
+
+            elif (item['value'] == "date"):
+                readFromFile = False
                 try:
                     xrange = item['range']
-                    value = random.randrange(xrange[0],xrange[1])
+                    value = quote + random_date(xrange[0], xrange[1], item['format'], random.random()) + quote
                 except KeyError:
-                    value = random.randrange(0,100)
+                    print("ERROR: " + item['label'] + " doesen't have range or format attribute")
+                    errors += 1
+                    value = quote + random_date("1/1/1990 00:00:00", "31/12/2080 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
+                
+            elif (item['value'] == "emoji"):
+                valuesFStream = open('data/emojis.json', encoding="utf8")
 
-        elif (item['value'] == "first_name"):
-            valuesFStream = open('data/first_names.json',)
+            if (readFromFile):
+                valuesArray = json.load(valuesFStream)
+                value = quote
+                leng = 1
 
-        elif (item['value'] == "middle_name"):
-            valuesFStream = open('data/middle-names.json',)
+                try:
+                    leng = item['length']
+                except KeyError:
+                    None
+                
+                for __ in range(leng):
+                    value += valuesArray[random.randrange(0,len(valuesArray))]
+                
+                value += quote
+                valuesFStream.close()
 
-        elif (item['value'] == "last_name"):
-            valuesFStream = open('data/last-names.json',)
-        
-        elif (item['value'] == "places"):
-            valuesFStream = open('data/places.json',)
+            values.append(str(value))
+        convertToFormat(_, headers, values)
+        if(data['show'] == False):
+            bar.update(_)
 
-        elif (item['value'] == "date"):
-            readFromFile = False
-            try:
-                xrange = item['range']
-                value = quote + random_date(xrange[0], xrange[1], item['format'], random.random()) + quote
-            except KeyError:
-                print("ERROR: " + item['label'] + " doesen't have range or format attribute")
-                errors += 1
-                value = quote + random_date("1/1/1990 00:00:00", "31/12/2080 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
-            
-        elif (item['value'] == "emoji"):
-            valuesFStream = open('data/emojis.json', encoding="utf8")
 
-        if (readFromFile):
-            valuesArray = json.load(valuesFStream)
-            value = quote
-            leng = 1
+    if(data['format'] == "xml"):
+        writeToFile("</items>\n")
 
-            try:
-                leng = item['length']
-            except KeyError:
-                None
-            
-            for __ in range(leng):
-                value += valuesArray[random.randrange(0,len(valuesArray))]
-            
-            value += quote
-            valuesFStream.close()
-
-        values.append(str(value))
-    convertToFormat(_, headers, values)
     if(data['show'] == False):
-        bar.update(_)
+        bar.finish()
+    
+    print("Script ended, information generated (" + str(data['quanitity']) + " rows) with " + str(errors) + " errors.\n")
+    errors = 0
 
-f.close()
-if(data['show'] == False):
-    bar.finish()
-print("Script ended, information generated (" + str(data['quanitity']) + " rows) with " + str(errors) + " errors")
+#endregion
+
+generate()
 
 # Start the server
-my_server.serve_forever()
+try:
+    if (http_settings['execute']):
+        my_server.serve_forever()
+except:
+    None
