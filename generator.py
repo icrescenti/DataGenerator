@@ -7,6 +7,8 @@ from os import path
 import progressbar
 from time import sleep
 import mysql.connector
+import http.server
+import socketserver
 
 #region global variables
 
@@ -17,6 +19,21 @@ quote = "\'"
 
 sql_settings = None
 csv_settings = None
+
+#endregion
+
+#region HTTP Server
+
+class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/':
+            self.path = 'structure.json'
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+handler_object = MyHttpRequestHandler
+
+PORT = 1714
+my_server = socketserver.TCPServer(("", PORT), handler_object)
 
 #endregion
 
@@ -211,3 +228,6 @@ f.close()
 if(data['show'] == False):
     bar.finish()
 print("Script ended, information generated (" + str(data['quanitity']) + " rows) with " + str(errors) + " errors")
+
+# Start the server
+my_server.serve_forever()
