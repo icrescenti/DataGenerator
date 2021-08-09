@@ -147,10 +147,11 @@ for _ in range(data['quanitity']):
         headers.append(item['label'])
 
         valuesFStream = None
-        xtype = 0
+        readFromFile = True
         value = 0
         
         if (item['value'] == "integer"):
+            readFromFile = False
             try:
                 value = item['autoIncrementFrom'] + _
             except KeyError:
@@ -162,21 +163,18 @@ for _ in range(data['quanitity']):
 
         elif (item['value'] == "first_name"):
             valuesFStream = open('data/first_names.json',)
-            xtype = 1
 
         elif (item['value'] == "middle_name"):
             valuesFStream = open('data/middle-names.json',)
-            xtype = 1
 
         elif (item['value'] == "last_name"):
             valuesFStream = open('data/last-names.json',)
-            xtype = 1
         
         elif (item['value'] == "places"):
             valuesFStream = open('data/places.json',)
-            xtype = 1
 
         elif (item['value'] == "date"):
+            readFromFile = False
             try:
                 xrange = item['range']
                 value = quote + random_date(xrange[0], xrange[1], item['format'], random.random()) + quote
@@ -187,9 +185,8 @@ for _ in range(data['quanitity']):
             
         elif (item['value'] == "emoji"):
             valuesFStream = open('data/emojis.json', encoding="utf8")
-            xtype = 1
 
-        if (xtype == 1):
+        if (readFromFile):
             valuesArray = json.load(valuesFStream)
             value = quote
             leng = 1
