@@ -33,6 +33,7 @@ def loadStructFile():
     global http_settings
     global xml_settings
     global bar
+    global mydb
 
     #region read strucutre file
     f = None
@@ -60,11 +61,20 @@ def loadStructFile():
         execute = sql_settings['execute']
         if (execute):
             mydb = mysql.connector.connect(
+                charset='utf8',
                 host=sql_settings['host'],
                 user=sql_settings['user'],
                 password=sql_settings['password'],
                 database=sql_settings['database']
             )
+
+            if(sql_settings['execute']):
+                mycursor = mydb.cursor()
+                mycursor.execute("SET NAMES utf8mb4;") #or utf8 or any other charset you want to handle
+                mycursor.execute("SET CHARACTER SET utf8mb4;") #same as above
+                mycursor.execute("SET character_set_connection=utf8mb4;") #same as abov
+                mydb.commit()
+
     except KeyError:
         None
 
@@ -138,6 +148,8 @@ my_server = socketserver.TCPServer(("", PORT), handler_object)
 #region generation functions
 
 def convertToFormat(pos, headers, values):
+    global mydb
+    
     if(data['show']):
         print("(BATCH #" + str(pos) + ") ", end = '')
         for _ in range(len(headers)):
@@ -206,6 +218,7 @@ def writeToFile(value):
 #region generation
 
 def generate():
+    global quote
     errors = 0
 
     print("Running.........")
