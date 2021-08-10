@@ -1,6 +1,6 @@
 {
-    "format": "xml",
-    "quanitity": 1,
+    "format": "json",
+    "quanitity": 10,
     "show": false,
     "sql_settings": 
     {
@@ -23,7 +23,7 @@
     "quote": "'",
     "http_settings":
     {
-        "execute": true,
+        "execute": false,
         "port": 7567
     },
     "fields":

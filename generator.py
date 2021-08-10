@@ -49,6 +49,7 @@ def loadStructFile():
 
     #region read preferences
 
+    quote = "\'"
     try:
         quote = data['quote']
     except KeyError:
@@ -74,7 +75,6 @@ def loadStructFile():
 
     try:
         http_settings = data['http_settings']
-        print(http_settings)
     except KeyError:
         None
         
@@ -181,6 +181,20 @@ def convertToFormat(pos, headers, values):
             xml_settings['newline']
             )
         writeToFile("   </item>\n")
+        
+    elif(data['format'] == "json"):
+        jsonString = "\n  {\n"
+        for headerIndex in range(len(headers)):
+            jsonString += "    \"" + headers[headerIndex] + "\": " + values[headerIndex]
+            if (headerIndex < (len(headers)-1)):
+                jsonString += ","
+            jsonString += "\n"
+        
+        jsonString += "  }"
+        if (pos < (data['quanitity']-1)):
+            jsonString += ","
+
+        writeToFile(jsonString)
 
 def writeToFile(value):
     gen = open('generated.' + data['format'], 'a', encoding="utf8")
@@ -207,7 +221,10 @@ def generate():
 
     #endregion
 
-    if(data['format'] == "xml"):
+    if(data['format'] == "json"):
+        quote = "\""
+        writeToFile("[")
+    elif(data['format'] == "xml"):
         writeToFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
         writeToFile("<items>\n")
 
@@ -279,8 +296,9 @@ def generate():
         if(data['show'] == False):
             bar.update(_)
 
-
-    if(data['format'] == "xml"):
+    if(data['format'] == "json"):
+        writeToFile("\n]")
+    elif(data['format'] == "xml"):
         writeToFile("</items>\n")
 
     if(data['show'] == False):
