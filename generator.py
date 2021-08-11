@@ -153,7 +153,7 @@ def convertToFormat(pos, headers, values):
     if(data['show']):
         print("(BATCH #" + str(pos) + ") ", end = '')
         for _ in range(len(headers)):
-            print(values[_], end = '')
+            print(values[_] + ",", end = '')
 
         print('')
 
@@ -284,6 +284,10 @@ def generate():
                     print("ERROR: " + item['label'] + " doesen't have range or format attribute")
                     errors += 1
                     value = quote + random_date("1/1/1990 00:00:00", "31/12/2080 00:00:00", '%d/%m/%Y %H:%M:%S', random.random()) + quote
+                
+            elif (item['value'] == "image"):
+                readFromFile = False
+                value = quote + "https://storage.terkstudios.com/DataGenerator/" + str(random.randrange(0,300)).zfill(7) + ".png" + quote
                 
             elif (item['value'] == "emoji"):
                 valuesFStream = open('data/emojis.json', encoding="utf8")

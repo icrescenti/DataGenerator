@@ -43,6 +43,10 @@
             "lenght": 2
         },
         {
+            "label": "profileImage",
+            "value": "image"
+        },
+        {
             "label": "active",
             "value": "integer",
             "range": [0,2]
