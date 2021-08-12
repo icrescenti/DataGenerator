@@ -58,22 +58,20 @@ def loadStructFile():
 
     try:
         sql_settings = data['sql_settings']
-        execute = sql_settings['execute']
-        if (execute):
-            mydb = mysql.connector.connect(
-                charset='utf8',
-                host=sql_settings['host'],
-                user=sql_settings['user'],
-                password=sql_settings['password'],
-                database=sql_settings['database']
-            )
+        mydb = mysql.connector.connect(
+            charset='utf8',
+            host=sql_settings['host'],
+            user=sql_settings['user'],
+            password=sql_settings['password'],
+            database=sql_settings['database']
+        )
 
-            if(sql_settings['execute']):
-                mycursor = mydb.cursor()
-                mycursor.execute("SET NAMES utf8mb4;") #or utf8 or any other charset you want to handle
-                mycursor.execute("SET CHARACTER SET utf8mb4;") #same as above
-                mycursor.execute("SET character_set_connection=utf8mb4;") #same as abov
-                mydb.commit()
+        if(sql_settings['execute']):
+            mycursor = mydb.cursor()
+            mycursor.execute("SET NAMES utf8mb4;") #or utf8 or any other charset you want to handle
+            mycursor.execute("SET CHARACTER SET utf8mb4;") #same as above
+            mycursor.execute("SET character_set_connection=utf8mb4;") #same as abov
+            mydb.commit()
 
     except KeyError:
         None
@@ -143,6 +141,14 @@ except:
 
 my_server = socketserver.TCPServer(("", PORT), handler_object)
 
+#endregion
+
+#region exeute sql query
+def executeQuery(sql):
+    mycursor = mydb.cursor()
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+    return myresult
 #endregion
 
 #region generation functions
@@ -255,11 +261,27 @@ def generate():
             if (item['value'] == "integer"):
                 readFromFile = False
                 try:
-                    value = item['autoIncrementFrom'] + _
+                    if (isinstance(item['autoIncrementFrom'], str)):
+                        value = int(executeQuery(item['autoIncrementFrom'])[0][0]) + 1
+                    else:
+                        value = item['autoIncrementFrom'] + _
+                    
                 except KeyError:
                     try:
                         xrange = item['range']
-                        value = random.randrange(xrange[0],xrange[1])
+                        if (isinstance(xrange[0], str)):
+                            sql = xrange[0]
+
+                            for rangeIndex in range(len(xrange)-1):
+                                if (isinstance(xrange[rangeIndex], str)):
+                                    sql = sql.replace(
+                                        "%" + str(rangeIndex+1),
+                                        str(executeQuery(xrange[rangeIndex+1] + " ORDER BY RAND() LIMIT 1;")[0][0])
+                                    )
+                            sql += " ORDER BY RAND() LIMIT 1;"
+                            value = executeQuery(sql)[0][0]
+                        else:
+                            value = random.randrange(xrange[0],xrange[1])
                     except KeyError:
                         value = random.randrange(0,100)
 

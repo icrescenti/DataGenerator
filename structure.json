@@ -44,7 +44,9 @@
         },
         {
             "label": "profileImage",
-            "value": "image"
+            "value": "image",
+            "width": 200,
+            "height": 200
         },
         {
             "label": "active",

@@ -5,5 +5,5 @@
 *.exe
 *.zip
 *.xml
-*.json
+generated.json
 dist/generator
