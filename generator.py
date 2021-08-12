@@ -287,7 +287,27 @@ def generate():
                 
             elif (item['value'] == "image"):
                 readFromFile = False
-                value = quote + "https://storage.terkstudios.com/DataGenerator/" + str(random.randrange(0,300)).zfill(7) + ".png" + quote
+                xtype = ""
+                width = 200
+                height = 200
+                
+                try:
+                    xtype = item['type']
+                except KeyError:
+                    None
+                try:
+                    width = item['width']
+                except KeyError:
+                    None
+                try:
+                    height = item['height']
+                except KeyError:
+                    None
+                
+                if (xtype == "human"):
+                    value = quote + "https://storage.terkstudios.com/DataGenerator/Humans/" + str(random.randrange(1,375)).zfill(7) + ".png" + quote
+                else:
+                    value = quote + "https://picsum.photos/" + str(width) + "/" + str(height) +"?random=1" + quote
                 
             elif (item['value'] == "emoji"):
                 valuesFStream = open('data/emojis.json', encoding="utf8")
