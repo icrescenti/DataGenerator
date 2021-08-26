@@ -58,13 +58,16 @@ def loadStructFile():
 
     try:
         sql_settings = data['sql_settings']
-        mydb = mysql.connector.connect(
-            charset='utf8',
-            host=sql_settings['host'],
-            user=sql_settings['user'],
-            password=sql_settings['password'],
-            database=sql_settings['database']
-        )
+        try:
+            mydb = mysql.connector.connect(
+                charset='utf8',
+                host=sql_settings['host'],
+                user=sql_settings['user'],
+                password=sql_settings['password'],
+                database=sql_settings['database']
+            )
+        except mysql.connector.Error as err:
+            None
 
         if(sql_settings['execute']):
             mycursor = mydb.cursor()
