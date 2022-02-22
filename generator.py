@@ -280,7 +280,11 @@ def generate():
                 readFromFile = False
                 try:
                     xrange = item['range']
-                    value = '\'' + xrange[random.randrange(0, len(xrange))] + '\''
+                    value = xrange[random.randrange(0, len(xrange))]
+                    if (data['format'] == "sql"):
+                        value = '\'' + value + '\''
+                    else:
+                        value = '\"' + value + '\"'
                 except KeyError:
                     pass
                     

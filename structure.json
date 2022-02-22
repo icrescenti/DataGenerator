@@ -59,6 +59,16 @@
             "range": [0,1000]
         },
         {
+            "label": "salary",
+            "value": "decimal",
+            "range": [1.0, 3240.89]
+        },
+        {
+            "label": "department",
+            "value": "customlist",
+            "range": ["Sales", "Manager", "Operator"]
+        },
+        {
             "label": "date",
             "value": "date",
             "range": ["01-01-2000","24-12-2040"],
