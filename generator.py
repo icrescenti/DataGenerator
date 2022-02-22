@@ -272,22 +272,33 @@ def generate():
                 except KeyError:
                     try:
                         xrange = item['range']
-                        if (isinstance(xrange[0], str)):
-                            sql = xrange[0]
-
-                            for rangeIndex in range(len(xrange)-1):
-                                if (isinstance(xrange[rangeIndex], str)):
-                                    sql = sql.replace(
-                                        "%" + str(rangeIndex+1),
-                                        str(executeQuery(xrange[rangeIndex+1] + " ORDER BY RAND() LIMIT 1;")[0][0])
-                                    )
-                            sql += " ORDER BY RAND() LIMIT 1;"
-                            value = executeQuery(sql)[0][0]
-                        else:
-                            value = random.randrange(xrange[0],xrange[1])
+                        value = random.randrange(xrange[0],xrange[1])
                     except KeyError:
                         value = random.randrange(0,100)
 
+            elif (item['value'] == "customlist"):
+                readFromFile = False
+                try:
+                    xrange = item['range']
+                    value = '\'' + xrange[random.randrange(0, len(xrange))] + '\''
+                except KeyError:
+                    pass
+                    
+            elif (item['value'] == "decimal"):
+                readFromFile = False
+                try:
+                    xrange = item['range']
+                    value = random.uniform(xrange[0], xrange[1])
+                except KeyError:
+                    pass
+            
+            elif (item['value'] == "sql"):
+                readFromFile = False
+                try:
+                    value = int(executeQuery(item['sql'])[0][0])
+                except KeyError:
+                    pass
+                
             elif (item['value'] == "first_name"):
                 valuesFStream = open('data/first_names.json',)
 
@@ -319,7 +330,7 @@ def generate():
                 try:
                     xtype = item['type']
                 except KeyError:
-                    None
+                    pass
                 try:
                     width = item['width']
                 except KeyError:
