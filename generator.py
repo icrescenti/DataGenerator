@@ -282,9 +282,9 @@ def generate():
                     xrange = item['range']
                     value = xrange[random.randrange(0, len(xrange))]
                     if (data['format'] == "sql"):
-                        value = '\'' + value + '\''
+                        value = '\'' + str(value) + '\''
                     else:
-                        value = '\"' + value + '\"'
+                        value = '\"' + str(value) + '\"'
                 except KeyError:
                     pass
                     
